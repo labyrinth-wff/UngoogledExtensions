@@ -117,6 +117,17 @@
                 </ul>
             </ul>
             <br>
+            <h4>"Why can't I just use the official webstore?"</h4>
+            <ul>
+                <li>The Chrome Web Store installs extensions only through Google‑controlled Chrome APIs.</li>
+                <li>“Add to Chrome” sends signed, authenticated requests with install tokens and metadata.</li>
+                <li>Ungoogled Chromium lacks these tokens and headers, so the Web Store will not serve .crx files.</li>
+                <li>The Web Store never exposes direct .crx links because downloads rely on Google’s install API.</li>
+                <li>Ungoogledextensions.com bypasses the Web Store and queries Google’s public update service.</li>
+                <li>The update service accepts anonymous requests with a valid extension ID and version.</li>
+                <li>The site’s JavaScript builds update URLs and downloads .crx files without authentication.</li>
+            </ul>
+            <br>
             <h4>Feedback</h4>
             <ul>
                 <li>For general feedback, troubleshooting, and to suggest extensions to add to the list above, post to the <a class="link" href="https://github.com/lukegosnellranken/UngoogledExtensions/discussions/9" target="_blank">repo discussion page</a>.</li>

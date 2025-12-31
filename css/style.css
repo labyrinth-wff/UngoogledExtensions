@@ -17,6 +17,7 @@ body {
 #main {
     position: absolute;
     z-index: 0;
+    /* max-width: 1120px !important; */
 }
 
 #topBanner {
