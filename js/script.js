@@ -23,10 +23,7 @@ let copyBtn = document.getElementById("copyBtn");
 let addToTextboxText;
 let error = document.getElementById("errorMessage");
 let currentVersion;
-let versionJSON;
-let versionResponse;
 let versionNumber;
-let checkVersion100Flag = false;
 let lastAvailableVer = 0;
 
 console.log(window.innerWidth);
@@ -40,24 +37,15 @@ if (window.innerWidth < 600) {
 // Chrome version surpasses two digits as of 02/02/22.
 function onPageLoad() {
     userURL.value="";
-    $.getJSON('https://versionhistory.googleapis.com/v1/chrome/platforms/all/channels/stable/versions', function(data) {
-        //console.log(`${JSON.stringify(data)}`);
-        versionJSON = `${JSON.stringify(data)}`;
-        let strPos1 = versionJSON.indexOf('"version":"') + 11;
-        let strPos2 = versionJSON.indexOf('"version":') + 12;
-        let strPos3 = versionJSON.indexOf('"version":') + 13;
-        if (versionJSON[strPos1] == 1) {
-            checkVersion100Flag = true;
+    $.getJSON(
+        'https://versionhistory.googleapis.com/v1/chrome/platforms/all/channels/stable/versions',
+        function (data) {
+            const latest = data.versions[0].version;
+            versionNumber = parseInt(latest.split('.')[0], 10);
+            console.log("Current Chrome version:", versionNumber);
+            populateArray();
         }
-        if (checkVersion100Flag = true) {
-            versionNumber = versionJSON[strPos1] + versionJSON[strPos2] + versionJSON[strPos3];
-        } else {
-            versionNumber = versionJSON[strPos1] + versionJSON[strPos2];
-        }
-        versionNumber = Number(versionNumber);
-        console.log("Current Chrome version: " + versionNumber);
-        populateArray();
-    });
+    );
 }
 
 function populateArray() {
@@ -123,13 +111,8 @@ function extensionEntered() {
     console.log("extendionEntered Hit");
     userURL = document.getElementById("extensionURL").value;
     console.log(userURL);
-    if (userURL.length > 30) {
-        flag2 = true;
-        checkflags();
-    } else {
-        flag2 = false;
-        checkflags();
-    }
+    flag2 = extractExtensionId(userURL) !== null;
+    checkflags();
 }
 
 // Add suggested extension to textbox when clicked.
@@ -154,37 +137,44 @@ function checkflags() {
 }
 
 // Generate URL for downloading with given extension and browser version.
-function onDownload() {
+async function onDownload() {
     userURL = document.getElementById("extensionURL").value;
-    extensionID = userURL;
-    console.log(extensionID);
-    extensionID = extensionID.split("/").pop();
-    extensionID = extensionID.split('?')[0];
-    console.log(extensionID);
+
+    extensionID = extractExtensionId(userURL);
+    if (!extensionID) {
+        error.style = "display:flex";
+        error.innerHTML = "Invalid Chrome extension URL";
+        return;
+    }
     finalURL = url1 + version + url2 + extensionID + url3;
-    console.log(finalURL);
-    urlExists(finalURL);
-    if (checkValidFlag = true) {
+
+    await urlExists(finalURL);
+
+    if (checkValidFlag === true) {
         window.location.href = finalURL;
     }
 }
 
 // Generate URL for copying to clipboard with given extension and browser version.
-function onCopy() {
+async function onCopy() {
     userURL = document.getElementById("extensionURL").value;
-    extensionID = userURL;
-    console.log(extensionID);
-    extensionID = extensionID.split("/").pop();
-    extensionID = extensionID.split('?')[0];
-    console.log(extensionID);
+
+    extensionID = extractExtensionId(userURL);
+    if (!extensionID) {
+        error.style = "display:flex";
+        error.innerHTML = "Invalid Chrome extension URL";
+        return;
+    }
     finalURL = url1 + version + url2 + extensionID + url3;
-    console.log(finalURL);
-    urlExists(finalURL);
-    if (checkValidFlag = true) {
-        navigator.clipboard.writeText(finalURL);
+
+    await urlExists(finalURL);
+
+    if (checkValidFlag === true) {
+        await navigator.clipboard.writeText(finalURL);
         alert("Download URL copied to clipboard");
     }
 }
+
 
 // urlExists check function fails due to CORS security measure. Thus, it is bypassed (download is allowed anyway).
 
@@ -230,7 +220,16 @@ function get_browser() {
       name: M[0],
       version: M[1]
     };
- }
+}
+
+function extractExtensionId(url) {
+     try {
+         const id = url.split("/").pop().split("?")[0];
+         return /^[a-p]{32}$/.test(id) ? id : null;
+     } catch {
+         return null;
+     }
+}
 
  // Commenting out uBlock filters. I am unsure if they are still helpful and there are better solutions.
  
@@ -283,7 +282,7 @@ function adblockScript() {
     finalURL = url1 + version + url2 + extensionID + url3;
     console.log(finalURL);
     checkValid(finalURL);
-    if (checkValidFlag = true) {
+    if (checkValidFlag == true) {
         window.location.href = finalURL;
     } else {
         console.log("FALSE!!!");
