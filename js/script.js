@@ -148,11 +148,7 @@ async function onDownload() {
     }
     finalURL = url1 + version + url2 + extensionID + url3;
 
-    await urlExists(finalURL);
-
-    if (checkValidFlag === true) {
-        window.location.href = finalURL;
-    }
+    window.location.href = finalURL;
 }
 
 // Generate URL for copying to clipboard with given extension and browser version.
